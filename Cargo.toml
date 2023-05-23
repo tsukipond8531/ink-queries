@@ -1,0 +1,27 @@
+[workspace]
+members = [
+    "oracle",
+]
+
+
+
+[package]
+name = "drng-protocol"
+version = "0.1.0"
+authors = ["Menna <emanuele.cryptdev@gmail.com>"]
+edition = "2021"
+
+license = "Apache-2.0"
+readme = "README.md"
+repository = "https://github.com/0xMenna01/drng-protocol"
+description = "A decentralised random number generator based on the VDF (Verifiable Delay Function)"
+keywords = ["blockchain", "smart-contracts", "ink", "wasm", "random", "crypto", "vdf", "p2p"]
+include = ["Cargo.toml", "src/**/*.rs"]
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[[bin]]
+name = "oracle"
+path = "oracle/src/main.rs"
+
+[dependencies]
