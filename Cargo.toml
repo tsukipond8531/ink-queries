@@ -1,6 +1,8 @@
 [workspace]
 members = [
     "oracle",
+    "contracts",
+    "utils"
 ]
 
 
@@ -25,3 +27,28 @@ name = "oracle"
 path = "oracle/src/main.rs"
 
 [dependencies]
+libp2p = "0.51.3"
+
+
+anyhow = "1.0.71"
+clap = { version = "4.3.0", features = ["derive", "env"] }
+tracing = "0.1.37"
+tracing-subscriber = { version = "0.3.17", features = ["env-filter"] }
+scale = { package = "parity-scale-codec", version = "3.0.0", features = ["derive"] }
+which = "4.4.0"
+colored = "2.0.0"
+serde = { version = "1.0.163", default-features = false, features = ["derive"] }
+serde_json = "1.0.96"
+rust_decimal = "1.29"
+
+
+# dependencies for extrinsics (deploying and calling a contract)
+async-std = { version = "1.12.0", features = ["attributes", "tokio1"] }
+sp-core = "20.0.0"
+sp-runtime = "23.0.0"
+sp-weights = "19.0.0"
+pallet-contracts-primitives = "23.0.0"
+scale-info = "2.7.0"
+subxt = "0.28.0"
+hex = "0.4.3"
+jsonrpsee = { version = "0.18.2", features = ["ws-client"] }

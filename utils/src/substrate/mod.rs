@@ -11,6 +11,13 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-mod client;
+mod extrinsics;
 
-fn main() {}
+struct SubstrateBaseConfig {
+    /// Secret key URI of the node's substrate account.
+    suri: String,
+    /// Password for the secret key.
+    password: Option<String>,
+    /// Substrate node url
+    url: url::Url,
+}
