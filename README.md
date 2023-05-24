@@ -1,4 +1,4 @@
-#DRNG Protocol
+###DRNG Protocol
 <div></div>
 
 A decentralised random number generator based on the VDF (Verifiable Delay Function).
