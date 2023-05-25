@@ -12,4 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-mod call;
+#![allow(clippy::too_many_arguments)]
+
+#[subxt::subxt(
+runtime_metadata_path = "src/substrate/runtime_api/contracts_runtime.scale",
+substitute_type(
+type = "sp_weights::weight_v2::Weight",
+with = "::subxt::utils::Static<::sp_weights::Weight>"
+)
+)]
+pub mod api {}
