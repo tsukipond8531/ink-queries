@@ -12,20 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-mod contract_call;
-mod runtime_api;
+mod contract;
+mod metadata;
+
+#[allow(dead_code)]
+mod transcoder;
+
 
 use anyhow::{
-    Ok,
     Result,
 };
-use jsonrpsee::rpc_params;
-use jsonrpsee::{
-    core::client::ClientT,
-    ws_client::WsClientBuilder,
-};
-use scale::{Decode, Encode};
-use sp_core::{Bytes, crypto::Pair, sr25519};
+
+use sp_core::{crypto::Pair, sr25519};
 
 pub use subxt::{
     Config,
@@ -33,6 +31,8 @@ pub use subxt::{
     PolkadotConfig as DefaultConfig,
     tx,
 };
+
+use url::Url;
 
 type Client = OnlineClient<DefaultConfig>;
 type Balance = u128;
@@ -51,12 +51,33 @@ struct SubstrateBaseConfig {
     /// Password for the secret key.
     password: Option<String>,
     /// Substrate node url
-    url: url::Url,
+    url: Url,
 }
 
-async fn state_call<A: Encode, R: Decode>(url: &str, func: &str, args: A) -> Result<R> {
-    let client = WsClientBuilder::default().build(&url).await?;
-    let params = rpc_params![func, Bytes(args.encode())];
-    let bytes: Bytes = client.request("state_call", params).await?;
-    Ok(R::decode(&mut bytes.as_ref())?)
+impl SubstrateBaseConfig {
+    /// Returns the signer for contract extrinsics.
+    pub fn signer(&self) -> Result<sr25519::Pair> {
+        Pair::from_string(&self.suri, self.password.as_ref().map(String::as_ref))
+            .map_err(|_| anyhow::anyhow!("Secret string error"))
+    }
+
+    pub fn url_to_string(&self) -> String {
+        let mut res = self.url.to_string();
+        match (self.url.port(), self.url.port_or_known_default()) {
+            (None, Some(port)) => {
+                res.insert_str(res.len() - 1, &format!(":{port}"));
+                res
+            }
+            _ => res,
+        }
+    }
+
+    /// Create a new [`PairSigner`] from the given [`sr25519::Pair`].
+    pub fn pair_signer(&self, pair: sr25519::Pair) -> PairSigner {
+        PairSigner::new(pair)
+    }
 }
+
+
+
+

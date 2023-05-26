@@ -16,3 +16,5 @@ include = ["Cargo.toml", "src/**/*.rs"]
 
 
 [dependencies]
+utils = { version = "0.1.0", path = "../utils" }
+async-std = { version = "1.12.0", features = ["attributes", "tokio1"] }
