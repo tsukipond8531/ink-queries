@@ -42,4 +42,8 @@ blake2 = "0.10.6"
 ink_metadata = "4.2.0"
 ink_env = "4.2.0"
 
+contract-build = { git = "https://github.com/paritytech/cargo-contract", version = "3.0.1" }
+contract-metadata = { git = "https://github.com/paritytech/cargo-contract", version = "3.0.1" }
+contract-transcode = { git = "https://github.com/paritytech/cargo-contract", version = "3.0.1" }
+
 

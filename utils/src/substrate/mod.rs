@@ -13,17 +13,12 @@
 // limitations under the License.
 
 mod contract;
-mod metadata;
-
-#[allow(dead_code)]
-mod transcoder;
 
 
-use anyhow::{
-    Result,
-};
+use anyhow::Result;
 
-use sp_core::{crypto::Pair, sr25519};
+use sp_core::sr25519;
+
 
 pub use subxt::{
     Config,
@@ -32,51 +27,39 @@ pub use subxt::{
     tx,
 };
 
-use url::Url;
+use crate::substrate::contract::{
+    SubstrateBaseConfig,
+    ContractInstance,
+    builder::ContractBuilder,
+};
 
 type Client = OnlineClient<DefaultConfig>;
 type Balance = u128;
-type CodeHash = <DefaultConfig as Config>::Hash;
-
 type PairSigner = tx::PairSigner<DefaultConfig, sr25519::Pair>;
 
-enum CallType {
-    DryRun,
-    StateChange,
+
+pub struct SubstrateContract {
+    pub instance: ContractInstance,
 }
 
-struct SubstrateBaseConfig {
-    /// Secret key URI of the node's substrate account.
-    suri: String,
-    /// Password for the secret key.
-    password: Option<String>,
-    /// Substrate node url
-    url: Url,
-}
+impl SubstrateContract {
+    pub fn new(suri: String, password: Option<String>) -> Result<Self> {
+        let config = SubstrateBaseConfig::new(suri, password);
 
-impl SubstrateBaseConfig {
-    /// Returns the signer for contract extrinsics.
-    pub fn signer(&self) -> Result<sr25519::Pair> {
-        Pair::from_string(&self.suri, self.password.as_ref().map(String::as_ref))
-            .map_err(|_| anyhow::anyhow!("Secret string error"))
+        let instance = ContractBuilder::default().
+            init_config(config).
+            sign()?
+            .build()?;
+
+        Ok(Self { instance })
     }
 
-    pub fn url_to_string(&self) -> String {
-        let mut res = self.url.to_string();
-        match (self.url.port(), self.url.port_or_known_default()) {
-            (None, Some(port)) => {
-                res.insert_str(res.len() - 1, &format!(":{port}"));
-                res
-            }
-            _ => res,
-        }
-    }
-
-    /// Create a new [`PairSigner`] from the given [`sr25519::Pair`].
-    pub fn pair_signer(&self, pair: sr25519::Pair) -> PairSigner {
-        PairSigner::new(pair)
+    pub fn get_pair_signer(&self) -> PairSigner {
+        let signer = self.instance.signer.signer().clone();
+        PairSigner::new(signer)
     }
 }
+
 
 
 

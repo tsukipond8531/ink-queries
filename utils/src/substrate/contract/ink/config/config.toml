@@ -1,6 +1,5 @@
 #Test config file
 
-contract_path = "src/substrate/contract/ink/testcontract.contract"
-toml = "src/substrate/contract/ink/Cargo.toml"
+contract_path = "utils/src/substrate/contract/ink/config/testcontract.contract"
 url = "ws://127.0.0.1:9944"
-contract_address = "5CVEunQyTTDR6zKqCKLubHVrLaHB2S7Dma1bn73Lhj24RMbb"
+contract_address = "5F1e9eSvTfsXip2WfdrvtGKCcdv7TRW1ftELoCH9d6nozb6k"

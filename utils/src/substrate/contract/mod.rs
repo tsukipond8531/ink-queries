@@ -12,13 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-mod builder;
+pub mod builder;
 mod ink;
-pub mod utils;
 mod error;
 
 use anyhow::{Context, Result};
-use crate::substrate::transcoder::Value;
+use contract_transcode::Value;
 
 use jsonrpsee::{
     core::client::ClientT,
@@ -27,26 +26,46 @@ use jsonrpsee::{
 };
 
 use pallet_contracts_primitives::ContractExecResult;
-
 use scale::{Decode, Encode};
-
 use sp_core::Bytes;
-
 use sp_weights::Weight;
-
-use subxt::{Config, OnlineClient};
-
-use crate::substrate::{
-    Balance,
-    DefaultConfig,
-    PairSigner,
-};
+use subxt::Config;
+use crate::substrate::{Balance, Client, DefaultConfig, PairSigner};
 use crate::substrate::contract::error::ErrorVariant;
 use crate::substrate::contract::ink::InkMeta;
+use sp_core::{crypto::Pair, sr25519};
+
+pub struct SubstrateBaseConfig {
+    /// Secret key URI of the node's substrate account.
+    suri: String,
+    /// Password for the secret key.
+    password: Option<String>,
+
+}
+
+impl SubstrateBaseConfig {
+    pub fn new(suri: String, password: Option<String>) -> Self {
+        Self {
+            suri,
+            password,
+        }
+    }
+
+    /// Returns the signer for contract extrinsics.
+    pub fn signer(&self) -> Result<sr25519::Pair> {
+        Pair::from_string(&self.suri, self.password.as_ref().map(String::as_ref))
+            .map_err(|_| anyhow::anyhow!("Secret string error"))
+    }
+
+    /// Create a new [`PairSigner`] from the given [`sr25519::Pair`].
+    pub fn pair_signer(&self, pair: sr25519::Pair) -> PairSigner {
+        PairSigner::new(pair)
+    }
+}
 
 
 pub struct ContractInstance {
-    signer: PairSigner,
+    pub signer: PairSigner,
     meta: InkMeta,
 }
 
@@ -66,7 +85,7 @@ impl ContractInstance {
         let call_data = transcoder.encode(&msg_name, &args)?;
 
         async_std::task::block_on(async {
-            let client = OnlineClient::<DefaultConfig>::from_url(self.meta.url.clone()).await?;
+            let client = Client::from_url(self.meta.url.clone()).await?;
 
             let result = self
                 .call_dry_run(call_data.clone())

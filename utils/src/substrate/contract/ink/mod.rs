@@ -28,20 +28,18 @@ use std::{
     option::Option,
     path::Path,
 };
+
 use std::str::FromStr;
-
-
-use crate::substrate::contract::utils::crate_metadata::CrateMetadata;
 
 pub use subxt::PolkadotConfig as DefaultConfig;
 use toml::Value;
-use crate::substrate::contract::utils;
-use crate::substrate::contract::utils::Target;
 
-use crate::substrate::metadata::ContractMetadata;
-use crate::substrate::transcoder::ContractMessageTranscoder;
+use contract_build::CrateMetadata;
+use contract_metadata::ContractMetadata;
+use contract_transcode::ContractMessageTranscoder;
 
-const CONFIG_PATH: &'static str = "src/substrate/contract/ink/config/config.toml";
+
+const CONFIG_PATH: &'static str = "utils/src/substrate/contract/ink/config/config.toml";
 
 
 /// Arguments required for creating and sending an extrinsic to a substrate node.
@@ -49,8 +47,6 @@ pub struct InkMeta {
     /// Path to a contract build artifact file: a raw `.wasm` file, a `.contract` bundle,
     /// or a `.json` metadata file.
     file: Option<PathBuf>,
-    /// Path to the `Cargo.toml` of the contract.
-    manifest_path: Option<PathBuf>,
     /// Node Url
     pub url: String,
     /// Address of the deployed contract
@@ -68,16 +64,16 @@ impl InkMeta {
                 .as_str()
                 .ok_or_else(|| anyhow::anyhow!("Missing or invalid '{}'", $field))?
         };
-    }
+        }
 
-        let contract_address = <DefaultConfig as Config>::AccountId::from_str(extract!(config, "url"))?;
+        let contract_address = <DefaultConfig as Config>::AccountId::from_str(extract!(config, "contract_address"))?;
 
         let ink_meta = InkMeta {
             file: Some(PathBuf::from(extract!(config, "contract_path"))),
-            manifest_path: Some(PathBuf::from(extract!(config, "toml"))),
             url: extract!(config, "url").to_owned(),
             contract_address,
         };
+
 
         Ok(ink_meta)
     }
@@ -85,7 +81,7 @@ impl InkMeta {
     /// Load contract artifacts.
     pub fn contract_artifacts(&self) -> Result<ContractArtifacts> {
         ContractArtifacts::from_manifest_or_file(
-            self.manifest_path.as_ref(),
+            None,
             self.file.as_ref(),
         )
     }
@@ -114,7 +110,7 @@ impl ContractArtifacts {
             (manifest_path, None) => {
                 let crate_metadata = CrateMetadata::from_manifest_path(
                     manifest_path,
-                    Target::Wasm,
+                    contract_build::Target::Wasm,
                 )?;
 
                 if crate_metadata.contract_bundle_path().exists() {
@@ -196,11 +192,6 @@ impl ContractArtifacts {
         })
     }
 
-    /// Get the code hash from the contract metadata.
-    pub fn code_hash(&self) -> Result<[u8; 32]> {
-        let metadata = self.metadata()?;
-        Ok(metadata.source.hash.0)
-    }
 
     /// Construct a [`ContractMessageTranscoder`] from contract metadata.
     pub fn contract_transcoder(&self) -> Result<ContractMessageTranscoder> {
@@ -217,7 +208,7 @@ pub struct WasmCode(Vec<u8>);
 impl WasmCode {
     /// The hash of the contract code: uniquely identifies the contract code on-chain.
     pub fn code_hash(&self) -> [u8; 32] {
-        utils::code_hash(&self.0)
+        contract_build::code_hash(&self.0)
     }
 }
 

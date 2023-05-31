@@ -15,26 +15,22 @@
 use anyhow::{
     Result,
 };
-use subxt::Config;
-use crate::substrate::{DefaultConfig, PairSigner, SubstrateBaseConfig};
-use crate::substrate::contract::ink::InkMeta;
-use super::ContractInstance;
+
+use crate::substrate::PairSigner;
+use super::{SubstrateBaseConfig, ink::InkMeta, ContractInstance};
 
 
-struct NotInitialized;
+pub struct NotInitialized;
 
-struct Initialized {
+pub struct Initialized {
     config: SubstrateBaseConfig,
-    contract_address: <DefaultConfig as Config>::AccountId,
 }
 
-struct Signed {
-    contract_address: <DefaultConfig as Config>::AccountId,
-    node_url: String,
+pub struct Signed {
     signer: PairSigner,
 }
 
-struct ContractBuilder<T> {
+pub struct ContractBuilder<T> {
     state: T,
 }
 
@@ -48,24 +44,21 @@ impl Default for ContractBuilder<NotInitialized> {
 
 
 impl ContractBuilder<NotInitialized> {
-    fn init_config(self, config: SubstrateBaseConfig, contract_address: <DefaultConfig as Config>::AccountId) -> ContractBuilder<Initialized> {
+    pub fn init_config(self, config: SubstrateBaseConfig) -> ContractBuilder<Initialized> {
         ContractBuilder {
             state: Initialized {
-                config,
-                contract_address,
+                config
             }
         }
     }
 }
 
 impl ContractBuilder<Initialized> {
-    fn sign(self) -> Result<ContractBuilder<Signed>> {
+    pub fn sign(self) -> Result<ContractBuilder<Signed>> {
         let pair = self.state.config.signer()?;
 
         Ok(ContractBuilder {
             state: Signed {
-                contract_address: self.state.contract_address,
-                node_url: self.state.config.url_to_string(),
                 signer: self.state.config.pair_signer(pair),
             }
         })
@@ -74,7 +67,7 @@ impl ContractBuilder<Initialized> {
 
 
 impl ContractBuilder<Signed> {
-    fn build(self) -> Result<ContractInstance> {
+    pub fn build(self) -> Result<ContractInstance> {
         let meta = InkMeta::from_config_file()?;
         Ok(ContractInstance::new(meta, self.state.signer))
     }
