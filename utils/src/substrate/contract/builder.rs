@@ -17,7 +17,7 @@ use anyhow::{
 };
 
 use crate::substrate::PairSigner;
-use super::{SubstrateBaseConfig, ink::InkMeta, ContractInstance};
+use super::{SubstrateBaseConfig, ink::InkMeta, ContractInstance, pair_signer};
 
 
 pub struct NotInitialized;
@@ -59,7 +59,7 @@ impl ContractBuilder<Initialized> {
 
         Ok(ContractBuilder {
             state: Signed {
-                signer: self.state.config.pair_signer(pair),
+                signer: pair_signer(pair),
             }
         })
     }

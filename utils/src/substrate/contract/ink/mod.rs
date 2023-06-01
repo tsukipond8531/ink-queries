@@ -31,13 +31,16 @@ use std::{
 
 use std::str::FromStr;
 
-pub use subxt::PolkadotConfig as DefaultConfig;
 use toml::Value;
 
 use contract_build::CrateMetadata;
 use contract_metadata::ContractMetadata;
 use contract_transcode::ContractMessageTranscoder;
+use phala_types::contract::ContractId;
+use scale::Decode;
+use crate::substrate::DefaultConfig;
 
+type AccountId = <DefaultConfig as Config>::AccountId;
 
 const CONFIG_PATH: &'static str = "utils/src/substrate/contract/ink/config/config.toml";
 
@@ -46,11 +49,18 @@ const CONFIG_PATH: &'static str = "utils/src/substrate/contract/ink/config/confi
 pub struct InkMeta {
     /// Path to a contract build artifact file: a raw `.wasm` file, a `.contract` bundle,
     /// or a `.json` metadata file.
-    file: Option<PathBuf>,
+    file: PathBuf,
     /// Node Url
     pub url: String,
     /// Address of the deployed contract
-    pub contract_address: <DefaultConfig as Config>::AccountId,
+    pub ink_contract_id: Option<AccountId>,
+    /// Phala contract id
+    pub phala_contract_id: Option<ContractId>,
+}
+
+enum Id {
+    InkId(String),
+    PhalaId(String),
 }
 
 impl InkMeta {
@@ -62,27 +72,45 @@ impl InkMeta {
         ($config:expr, $field:expr) => {
             $config[$field]
                 .as_str()
-                .ok_or_else(|| anyhow::anyhow!("Missing or invalid '{}'", $field))?
+                .map(|value| value.to_owned())
         };
         }
 
-        let contract_address = <DefaultConfig as Config>::AccountId::from_str(extract!(config, "contract_address"))?;
+        let ink_contract_id = extract!(config, "ink_contract_id");
+        let phala_contract_id = extract!(config, "phala_contract_id");
 
-        let ink_meta = InkMeta {
-            file: Some(PathBuf::from(extract!(config, "contract_path"))),
-            url: extract!(config, "url").to_owned(),
-            contract_address,
+        let id = match (ink_contract_id, phala_contract_id) {
+            (Some(id), None) => Id::InkId(id),
+            (None, Some(id)) => Id::PhalaId(id),
+            _ => anyhow::bail!("Failed to load Contract Id")
+        };
+
+        let (ink_contract_id, phala_contract_id) = if let Id::InkId(ink_id) = id {
+            let contract_id = <DefaultConfig as Config>::AccountId::from_str(ink_id.as_str())?;
+            (Some(contract_id), None)
+        } else if let Id::PhalaId(phala_id) = id {
+            let contract_id = decode_hex(phala_id.as_str())?;
+            let contract_id = ContractId::decode(&mut &contract_id[..])?;
+            (None, Some(contract_id))
         };
 
 
+        let ink_meta = InkMeta {
+            file: PathBuf::from(extract!(config, "contract_path").context("Failed to load file")?),
+            url: extract!(config, "url").context("Failed to load url")?.to_owned(),
+            ink_contract_id,
+            phala_contract_id,
+        };
+
         Ok(ink_meta)
     }
+
 
     /// Load contract artifacts.
     pub fn contract_artifacts(&self) -> Result<ContractArtifacts> {
         ContractArtifacts::from_manifest_or_file(
             None,
-            self.file.as_ref(),
+            Some(self.file.as_ref()),
         )
     }
 }
@@ -211,4 +239,13 @@ impl WasmCode {
         contract_build::code_hash(&self.0)
     }
 }
+
+fn get_contracts_ids(ink_id: String, phala_id: String) -> (Option<AccountId>, Option<ContractId>) {}
+
+
+fn decode_hex(hex_str: &str) -> Result<Vec<u8>, hex::FromHexError> {
+    hex::decode(hex_str.strip_prefix("0x"))
+}
+
+
 

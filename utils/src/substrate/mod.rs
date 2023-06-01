@@ -27,11 +27,8 @@ pub use subxt::{
     tx,
 };
 
-use crate::substrate::contract::{
-    SubstrateBaseConfig,
-    ContractInstance,
-    builder::ContractBuilder,
-};
+use contract::{SubstrateBaseConfig, ContractInstance, builder::ContractBuilder};
+pub use contract::Execution;
 
 type Client = OnlineClient<DefaultConfig>;
 type Balance = u128;
