@@ -13,11 +13,7 @@
 // limitations under the License.
 
 use sp_runtime::DispatchError;
-use std::fmt::{
-    self,
-    Debug,
-    Display,
-};
+use std::fmt::{self, Debug, Display};
 
 #[derive(serde::Serialize)]
 pub enum ErrorVariant {
@@ -25,28 +21,27 @@ pub enum ErrorVariant {
     Module(ModuleError),
     #[serde(rename = "generic_error")]
     Generic(GenericError),
+    PhalaError(String), //todo: add phala error
 }
 
 impl From<subxt::Error> for ErrorVariant {
     fn from(error: subxt::Error) -> Self {
         match error {
-            subxt::Error::Runtime(subxt::error::DispatchError::Module(module_err)) => {
-                module_err
-                    .details()
-                    .map(|details| {
-                        ErrorVariant::Module(ModuleError {
-                            pallet: details.pallet().to_string(),
-                            error: details.error().to_string(),
-                            docs: details.docs().to_vec(),
-                        })
+            subxt::Error::Runtime(subxt::error::DispatchError::Module(module_err)) => module_err
+                .details()
+                .map(|details| {
+                    ErrorVariant::Module(ModuleError {
+                        pallet: details.pallet().to_string(),
+                        error: details.error().to_string(),
+                        docs: details.docs().to_vec(),
                     })
-                    .unwrap_or_else(|err| {
-                        ErrorVariant::Generic(GenericError::from_message(format!(
-                            "Error extracting subxt error details: {}",
-                            err
-                        )))
-                    })
-            }
+                })
+                .unwrap_or_else(|err| {
+                    ErrorVariant::Generic(GenericError::from_message(format!(
+                        "Error extracting subxt error details: {}",
+                        err
+                    )))
+                }),
             err => ErrorVariant::Generic(GenericError::from_message(err.to_string())),
         }
     }
@@ -96,11 +91,9 @@ impl ErrorVariant {
                     docs: details.docs().to_owned(),
                 }))
             }
-            err => {
-                Ok(ErrorVariant::Generic(GenericError::from_message(format!(
-                    "DispatchError: {err:?}"
-                ))))
-            }
+            err => Ok(ErrorVariant::Generic(GenericError::from_message(format!(
+                "DispatchError: {err:?}"
+            )))),
         }
     }
 }
@@ -114,13 +107,12 @@ impl Debug for ErrorVariant {
 impl Display for ErrorVariant {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            ErrorVariant::Module(err) => {
-                f.write_fmt(format_args!(
-                    "ModuleError: {}::{}: {:?}",
-                    err.pallet, err.error, err.docs
-                ))
-            }
+            ErrorVariant::Module(err) => f.write_fmt(format_args!(
+                "ModuleError: {}::{}: {:?}",
+                err.pallet, err.error, err.docs
+            )),
             ErrorVariant::Generic(err) => write!(f, "{}", err.error),
+            ErrorVariant::PhalaError(err) => write!(f, "{}", err),
         }
     }
 }

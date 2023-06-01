@@ -17,17 +17,11 @@ mod error;
 mod ink;
 mod query;
 
-use crate::substrate::contract::error::ErrorVariant;
-use crate::substrate::contract::ink::InkMeta;
-use crate::substrate::contract::query::{InkQuery, Query};
-use crate::substrate::{Balance, Client, DefaultConfig, PairSigner};
-use anyhow::{Context, Result};
-use contract_transcode::Value;
-use pallet_contracts_primitives::ContractExecResult;
-use phala_types::contract::ContractId;
+use self::{query::{CallResult, QueryBuilder, Query}, ink::InkMeta, error::ErrorVariant};
+use crate::substrate::PairSigner;
+use anyhow::Result;
+use contract_transcode::ContractMessageTranscoder;
 use sp_core::{crypto::Pair, sr25519};
-use sp_weights::Weight;
-use subxt::Config;
 
 pub struct SubstrateBaseConfig {
     /// Secret key URI of the node's substrate account.
@@ -63,8 +57,10 @@ impl ContractInstance {
         Self { meta, signer }
     }
 
-    pub fn call_msg(&self, msg_name: &str, args: Vec<&str>) -> Result<CallResult, ErrorVariant> {
-        let call_data = self.get_encoded_msg(msg_name, args);
+    pub fn call_msg(&self, msg_name: &str, args: Vec<String>) -> Result<CallResult, ErrorVariant> {
+        let transcoder = self.get_transcoder()?;
+
+        let call_data = transcoder.encode(msg_name, &args)?;
 
         let query = match (
             self.meta.ink_contract_id.clone(),
@@ -72,39 +68,23 @@ impl ContractInstance {
         ) {
             (Some(ink_id), None) => Query::InkQuery(call_data, ink_id),
             (None, Some(phala_id)) => Query::PhalaQuery(call_data, phala_id),
-            _ => anyhow::bail!("Contract Id Error: must provide only one contract address"),
+            _ => {
+                return Err(ErrorVariant::from(
+                    "Contract Id Error: must provide only one contract address",
+                ))
+            }
         };
 
-        query.query(self.meta.url.clone(), &self.signer)
+        let contract_query = QueryBuilder::new(msg_name.to_string(), transcoder)
+            .query(query)
+            .build();
+
+        contract_query.call(self.meta.url.clone(), &self.signer)
     }
 
-    fn get_encoded_msg(&self, msg_name: &str, args: Vec<&str>) -> Vec<u8> {
+    fn get_transcoder(&self) -> Result<ContractMessageTranscoder> {
         let artifacts = self.meta.contract_artifacts()?;
         let transcoder = artifacts.contract_transcoder()?;
-
-        transcoder.encode(msg_name, &args)?;
+        Ok(transcoder)
     }
-}
-
-/// A struct that encodes RPC parameters required for a call to a smart contract.
-///
-/// Copied from `pallet-contracts-rpc-runtime-api`.
-#[derive(Encode)]
-pub struct CallRequest {
-    origin: <DefaultConfig as Config>::AccountId,
-    dest: <DefaultConfig as Config>::AccountId,
-    value: Balance,
-    gas_limit: Option<Weight>,
-    storage_deposit_limit: Option<Balance>,
-    input_data: Vec<u8>,
-}
-
-/// Result of the contract call
-#[derive(serde::Serialize)]
-pub struct CallResult {
-    /// Result of a dry run
-    pub is_success: bool,
-    /// Was the operation reverted
-    pub reverted: bool,
-    pub data: Value,
 }

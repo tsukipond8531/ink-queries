@@ -14,5 +14,6 @@
 
 pub mod substrate;
 
-
-
+pub fn test() {
+    // let a = phactory_api::pruntime_client::new_pruntime_client("base_url".to_owned());
+}

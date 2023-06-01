@@ -29,9 +29,4 @@ contract-transcode = { git = "https://github.com/paritytech/cargo-contract", ver
 
 # phala dependencies
 phala-types = { git = "https://github.com/Phala-Network/phala-blockchain", branch = "master" }
-phactory-api = { git = "https://github.com/Phala-Network/phala-blockchain", branch = "master", features = ["pruntime-client"] }
-phala-crypto = { git = "https://github.com/Phala-Network/phala-blockchain", branch = "master" }
-
-
-
-
+# phala-crypto = { git = "https://github.com/Phala-Network/phala-blockchain", tag = "nightly-2023-06-01" }

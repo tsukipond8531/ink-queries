@@ -14,38 +14,29 @@
 
 mod contract;
 
-
 use anyhow::Result;
 
 use sp_core::sr25519;
 
+pub use subxt::{tx, Config, OnlineClient, PolkadotConfig as DefaultConfig};
 
-pub use subxt::{
-    Config,
-    OnlineClient,
-    PolkadotConfig as DefaultConfig,
-    tx,
-};
-
-use contract::{SubstrateBaseConfig, ContractInstance, builder::ContractBuilder};
-pub use contract::Execution;
+use contract::{builder::ContractBuilder, ContractInstance, SubstrateBaseConfig};
 
 type Client = OnlineClient<DefaultConfig>;
 type Balance = u128;
 type PairSigner = tx::PairSigner<DefaultConfig, sr25519::Pair>;
-
 
 pub struct SubstrateContract {
     pub instance: ContractInstance,
 }
 
 impl SubstrateContract {
-    pub fn new(suri: String, password: Option<String>) -> Result<Self> {
-        let config = SubstrateBaseConfig::new(suri, password);
+    pub fn from_account(suri: String, password: Option<String>) -> Result<Self> {
+        let config: SubstrateBaseConfig = SubstrateBaseConfig::new(suri, password);
 
-        let instance = ContractBuilder::default().
-            init_config(config).
-            sign()?
+        let instance = ContractBuilder::default()
+            .init_config(config)
+            .sign()?
             .build()?;
 
         Ok(Self { instance })
@@ -56,8 +47,3 @@ impl SubstrateContract {
         PairSigner::new(signer)
     }
 }
-
-
-
-
-

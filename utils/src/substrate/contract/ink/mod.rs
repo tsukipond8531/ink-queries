@@ -12,38 +12,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use anyhow::{
-    anyhow,
-    Context,
-    Ok,
-    Result,
-};
+use anyhow::{anyhow, Context, Ok, Result};
 
 use std::{fs, path::PathBuf};
 
 use subxt::Config;
 
-
-use std::{
-    option::Option,
-    path::Path,
-};
+use std::{option::Option, path::Path};
 
 use std::str::FromStr;
 
 use toml::Value;
 
+use crate::substrate::DefaultConfig;
 use contract_build::CrateMetadata;
 use contract_metadata::ContractMetadata;
 use contract_transcode::ContractMessageTranscoder;
 use phala_types::contract::ContractId;
 use scale::Decode;
-use crate::substrate::DefaultConfig;
 
 type AccountId = <DefaultConfig as Config>::AccountId;
 
 const CONFIG_PATH: &'static str = "utils/src/substrate/contract/ink/config/config.toml";
-
 
 /// Arguments required for creating and sending an extrinsic to a substrate node.
 pub struct InkMeta {
@@ -69,11 +59,12 @@ impl InkMeta {
         let config: Value = toml::from_str(&config_content)?;
 
         macro_rules! extract {
-        ($config:expr, $field:expr) => {
-            $config[$field]
-                .as_str()
-                .map(|value| value.to_owned())
-        };
+            ($config:expr, $field:expr) => {
+                $config
+                    .get($field)
+                    .and_then(|value| value.as_str().map(|v| Some(v.to_owned())))
+                    .unwrap_or(None)
+            };
         }
 
         let ink_contract_id = extract!(config, "ink_contract_id");
@@ -82,22 +73,24 @@ impl InkMeta {
         let id = match (ink_contract_id, phala_contract_id) {
             (Some(id), None) => Id::InkId(id),
             (None, Some(id)) => Id::PhalaId(id),
-            _ => anyhow::bail!("Failed to load Contract Id")
+            _ => anyhow::bail!("Failed to load Contract Id"),
         };
 
-        let (ink_contract_id, phala_contract_id) = if let Id::InkId(ink_id) = id {
-            let contract_id = <DefaultConfig as Config>::AccountId::from_str(ink_id.as_str())?;
-            (Some(contract_id), None)
-        } else if let Id::PhalaId(phala_id) = id {
-            let contract_id = decode_hex(phala_id.as_str())?;
-            let contract_id = ContractId::decode(&mut &contract_id[..])?;
-            (None, Some(contract_id))
+        let (ink_contract_id, phala_contract_id) = match id {
+            Id::InkId(ink_id) => {
+                let contract_id = <DefaultConfig as Config>::AccountId::from_str(ink_id.as_str())?;
+                (Some(contract_id), None)
+            }
+            Id::PhalaId(phala_id) => {
+                let contract_id = decode_hex(phala_id.as_str());
+                let contract_id = ContractId::decode(&mut &contract_id[..])?;
+                (None, Some(contract_id))
+            }
         };
-
 
         let ink_meta = InkMeta {
             file: PathBuf::from(extract!(config, "contract_path").context("Failed to load file")?),
-            url: extract!(config, "url").context("Failed to load url")?.to_owned(),
+            url: extract!(config, "url").context("Failed to load url")?,
             ink_contract_id,
             phala_contract_id,
         };
@@ -105,13 +98,9 @@ impl InkMeta {
         Ok(ink_meta)
     }
 
-
     /// Load contract artifacts.
     pub fn contract_artifacts(&self) -> Result<ContractArtifacts> {
-        ContractArtifacts::from_manifest_or_file(
-            None,
-            Some(self.file.as_ref()),
-        )
+        ContractArtifacts::from_manifest_or_file(None, Some(&self.file))
     }
 }
 
@@ -136,10 +125,8 @@ impl ContractArtifacts {
     ) -> Result<ContractArtifacts> {
         let artifact_path = match (manifest_path, file) {
             (manifest_path, None) => {
-                let crate_metadata = CrateMetadata::from_manifest_path(
-                    manifest_path,
-                    contract_build::Target::Wasm,
-                )?;
+                let crate_metadata =
+                    CrateMetadata::from_manifest_path(manifest_path, contract_build::Target::Wasm)?;
 
                 if crate_metadata.contract_bundle_path().exists() {
                     crate_metadata.contract_bundle_path()
@@ -162,37 +149,37 @@ impl ContractArtifacts {
     /// Given a contract artifact path, load the contract code and metadata where
     /// possible.
     fn from_artifact_path(path: &Path) -> Result<Self> {
-        let (metadata_path, metadata, code) =
-            match path.extension().and_then(|ext| ext.to_str()) {
-                Some("contract") | Some("json") => {
-                    let metadata = ContractMetadata::load(path)?;
-                    let code = metadata.clone().source.wasm.map(|wasm| WasmCode(wasm.0));
-                    (PathBuf::from(path), Some(metadata), code)
+        let (metadata_path, metadata, code) = match path.extension().and_then(|ext| ext.to_str()) {
+            Some("contract") | Some("json") => {
+                let metadata = ContractMetadata::load(path)?;
+                let code = metadata.clone().source.wasm.map(|wasm| WasmCode(wasm.0));
+                (PathBuf::from(path), Some(metadata), code)
+            }
+            Some("wasm") => {
+                let file_name = path
+                    .file_stem()
+                    .context("WASM bundle file has unreadable name")?
+                    .to_str()
+                    .context("Error parsing filename string")?;
+                let code = Some(WasmCode(fs::read(path)?));
+                let dir = path.parent().map_or_else(PathBuf::new, PathBuf::from);
+                let metadata_path = dir.join(format!("{file_name}.json"));
+                if !metadata_path.exists() {
+                    (metadata_path, None, code)
+                } else {
+                    let metadata = ContractMetadata::load(&metadata_path)?;
+                    (metadata_path, Some(metadata), code)
                 }
-                Some("wasm") => {
-                    let file_name = path.file_stem()
-                        .context("WASM bundle file has unreadable name")?
-                        .to_str()
-                        .context("Error parsing filename string")?;
-                    let code = Some(WasmCode(fs::read(path)?));
-                    let dir = path.parent().map_or_else(PathBuf::new, PathBuf::from);
-                    let metadata_path = dir.join(format!("{file_name}.json"));
-                    if !metadata_path.exists() {
-                        (metadata_path, None, code)
-                    } else {
-                        let metadata = ContractMetadata::load(&metadata_path)?;
-                        (metadata_path, Some(metadata), code)
-                    }
-                }
-                Some(ext) => anyhow::bail!(
-                    "Invalid artifact extension {ext}, expected `.contract`, `.json` or `.wasm`"
-                ),
-                None => {
-                    anyhow::bail!(
-                        "Artifact path has no extension, expected `.contract`, `.json`, or `.wasm`"
-                    )
-                }
-            };
+            }
+            Some(ext) => anyhow::bail!(
+                "Invalid artifact extension {ext}, expected `.contract`, `.json` or `.wasm`"
+            ),
+            None => {
+                anyhow::bail!(
+                    "Artifact path has no extension, expected `.contract`, `.json`, or `.wasm`"
+                )
+            }
+        };
         Ok(Self {
             artifacts_path: path.into(),
             metadata_path,
@@ -220,7 +207,6 @@ impl ContractArtifacts {
         })
     }
 
-
     /// Construct a [`ContractMessageTranscoder`] from contract metadata.
     pub fn contract_transcoder(&self) -> Result<ContractMessageTranscoder> {
         let metadata = self.metadata()?;
@@ -240,12 +226,10 @@ impl WasmCode {
     }
 }
 
-fn get_contracts_ids(ink_id: String, phala_id: String) -> (Option<AccountId>, Option<ContractId>) {}
-
-
-fn decode_hex(hex_str: &str) -> Result<Vec<u8>, hex::FromHexError> {
-    hex::decode(hex_str.strip_prefix("0x"))
+fn try_decode_hex(hex_str: &str) -> Result<Vec<u8>, hex::FromHexError> {
+    hex::decode(hex_str.strip_prefix("0x").unwrap_or(hex_str))
 }
 
-
-
+fn decode_hex(hex_str: &str) -> Vec<u8> {
+    try_decode_hex(hex_str).expect("Failed to parse hex_data")
+}
