@@ -14,14 +14,20 @@
 
 pub mod builder;
 mod error;
-mod ink;
-mod query;
+pub mod ink;
+pub mod query;
 
-use self::{query::{CallResult, QueryBuilder, Query}, ink::InkMeta, error::ErrorVariant};
+use self::{
+    error::ErrorVariant,
+    ink::InkMeta,
+    query::{CallResult, Query, QueryBuilder},
+};
 use crate::substrate::PairSigner;
 use anyhow::Result;
 use contract_transcode::ContractMessageTranscoder;
 use sp_core::{crypto::Pair, sr25519};
+
+use super::phala::Nonce;
 
 pub struct SubstrateBaseConfig {
     /// Secret key URI of the node's substrate account.
@@ -57,7 +63,14 @@ impl ContractInstance {
         Self { meta, signer }
     }
 
-    pub fn call_msg(&self, msg_name: &str, args: Vec<String>) -> Result<CallResult, ErrorVariant> {
+    /// Allows to call a substrate based ink smart contract
+    /// The nonce has to be provided if a phala smart contract is being called
+    pub fn call_msg(
+        &self,
+        msg_name: &str,
+        args: Vec<String>,
+        nonce: Option<Nonce>,
+    ) -> Result<CallResult, ErrorVariant> {
         let transcoder = self.get_transcoder()?;
 
         let call_data = transcoder.encode(msg_name, &args)?;
@@ -67,7 +80,7 @@ impl ContractInstance {
             self.meta.phala_contract_id,
         ) {
             (Some(ink_id), None) => Query::InkQuery(call_data, ink_id),
-            (None, Some(phala_id)) => Query::PhalaQuery(call_data, phala_id),
+            (None, Some(phala_id)) => Query::PhalaQuery(call_data, phala_id, nonce),
             _ => {
                 return Err(ErrorVariant::from(
                     "Contract Id Error: must provide only one contract address",

@@ -1,7 +1,7 @@
 [package]
 name = "utils"
 version = "0.1.0"
-edition = "2021"
+edition = "2018"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -27,6 +27,8 @@ contract-build = { git = "https://github.com/paritytech/cargo-contract", version
 contract-metadata = { git = "https://github.com/paritytech/cargo-contract", version = "3.0.1" }
 contract-transcode = { git = "https://github.com/paritytech/cargo-contract", version = "3.0.1" }
 
+
 # phala dependencies
 phala-types = { git = "https://github.com/Phala-Network/phala-blockchain", branch = "master" }
-# phala-crypto = { git = "https://github.com/Phala-Network/phala-blockchain", tag = "nightly-2023-06-01" }
+phala-crypto = { git = "https://github.com/Phala-Network/phala-blockchain", branch = "master" }
+phactory-api = { git = "https://github.com/Phala-Network/phala-blockchain", branch = "master", features = ["pruntime-client"] }

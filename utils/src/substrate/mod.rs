@@ -13,7 +13,7 @@
 // limitations under the License.
 
 mod contract;
-
+mod phala;
 use anyhow::Result;
 
 use sp_core::sr25519;

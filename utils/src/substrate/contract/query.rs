@@ -13,6 +13,7 @@
 // limitations under the License.
 
 use crate::substrate::contract::error::ErrorVariant;
+use crate::substrate::phala::Nonce;
 use crate::substrate::{Balance, Client, DefaultConfig, PairSigner};
 use anyhow::{Context, Result};
 use contract_transcode::ContractMessageTranscoder;
@@ -71,7 +72,7 @@ impl QueryBuilder {
 
 pub enum Query {
     InkQuery(Vec<u8>, <DefaultConfig as Config>::AccountId),
-    PhalaQuery(Vec<u8>, ContractId),
+    PhalaQuery(Vec<u8>, ContractId, Nonce),
 }
 
 impl Query {

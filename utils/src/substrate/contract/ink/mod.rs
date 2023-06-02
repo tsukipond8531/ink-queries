@@ -226,10 +226,10 @@ impl WasmCode {
     }
 }
 
-fn try_decode_hex(hex_str: &str) -> Result<Vec<u8>, hex::FromHexError> {
+pub fn try_decode_hex(hex_str: &str) -> Result<Vec<u8>, hex::FromHexError> {
     hex::decode(hex_str.strip_prefix("0x").unwrap_or(hex_str))
 }
 
-fn decode_hex(hex_str: &str) -> Vec<u8> {
+pub fn decode_hex(hex_str: &str) -> Vec<u8> {
     try_decode_hex(hex_str).expect("Failed to parse hex_data")
 }
