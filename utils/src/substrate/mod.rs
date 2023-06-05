@@ -44,6 +44,6 @@ impl SubstrateContract {
 
     pub fn get_pair_signer(&self) -> PairSigner {
         let signer = self.instance.signer.signer().clone();
-        PairSigner::new(signer)
+        contract::pair_signer(signer)
     }
 }

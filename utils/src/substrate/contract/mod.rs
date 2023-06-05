@@ -80,7 +80,10 @@ impl ContractInstance {
             self.meta.phala_contract_id,
         ) {
             (Some(ink_id), None) => Query::InkQuery(call_data, ink_id),
-            (None, Some(phala_id)) => Query::PhalaQuery(call_data, phala_id, nonce),
+            (None, Some(phala_id)) => {
+                let nonce = nonce.expect("Must provide nonce to call phala");
+                Query::PhalaQuery(call_data, phala_id, nonce)
+            }
             _ => {
                 return Err(ErrorVariant::from(
                     "Contract Id Error: must provide only one contract address",

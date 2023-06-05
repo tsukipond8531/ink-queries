@@ -2,4 +2,4 @@
 
 contract_path = "utils/src/substrate/contract/ink/config/testcontract.contract"
 url = "ws://127.0.0.1:9944"
-ink_contract_id = "5ETJ2pdzwquVmJuqdSTtdheAnvG4m8e7YNBcGMCE2a9rMZvz"
+ink_contract_id = "5HAKXQzgjUZEFgtXb7GWLQQNwUSt5ji38CchMLmNd9U59xT1"

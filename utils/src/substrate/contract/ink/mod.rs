@@ -13,15 +13,11 @@
 // limitations under the License.
 
 use anyhow::{anyhow, Context, Ok, Result};
-
-use std::{fs, path::PathBuf};
-
-use subxt::Config;
-
-use std::{option::Option, path::Path};
-
+use std::convert::TryFrom;
 use std::str::FromStr;
-
+use std::{fs, path::PathBuf};
+use std::{option::Option, path::Path};
+use subxt::Config;
 use toml::Value;
 
 use crate::substrate::DefaultConfig;
@@ -94,7 +90,6 @@ impl InkMeta {
             ink_contract_id,
             phala_contract_id,
         };
-
         Ok(ink_meta)
     }
 

@@ -110,7 +110,7 @@ impl Query {
                     }
                 }
             }),
-            Query::PhalaQuery(_message, _id) => {
+            Query::PhalaQuery(_message, _id, _nonce) => {
                 Err(ErrorVariant::PhalaError("Not implemented".to_string()))
             }
         }

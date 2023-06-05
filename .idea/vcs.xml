@@ -2,5 +2,9 @@
 <project version="4">
   <component name="VcsDirectoryMappings">
     <mapping directory="" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/phala-blockchain" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/phala-blockchain/crates/phactory/api/proto" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/phala-blockchain/standalone/prouter/i2pd" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/phala-blockchain/subxt" vcs="Git" />
   </component>
 </project>

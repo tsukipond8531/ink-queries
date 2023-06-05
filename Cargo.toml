@@ -6,6 +6,10 @@ members = [
     "debug-cli",
 ]
 
+exclude = [
+    "phala-blockchain",
+    ]
+
 resolver = "2"
 metadata.dylint.libraries = [
     { git = "https://github.com/Phala-Network/dylint-rules.git", pattern = "rules/*" },
@@ -30,8 +34,3 @@ inherits = "release"
 debug = 1 # debug symbols are useful for profilers
 debug-assertions = true
 overflow-checks = true
-
-
-[patch.crates-io]
-# TODO.kevin: Move back to crates.io once it released 1.0
-derive_more = { version = "0.99.17", git = "https://github.com/JelteF/derive_more" }
