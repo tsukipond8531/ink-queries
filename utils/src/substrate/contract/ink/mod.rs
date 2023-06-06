@@ -20,11 +20,10 @@ use std::{option::Option, path::Path};
 use subxt::Config;
 use toml::Value;
 
-use crate::substrate::DefaultConfig;
+use crate::substrate::{DefaultConfig, ContractId};
 use contract_build::CrateMetadata;
 use contract_metadata::ContractMetadata;
 use contract_transcode::ContractMessageTranscoder;
-use phala_types::contract::ContractId;
 use scale::Decode;
 
 type AccountId = <DefaultConfig as Config>::AccountId;

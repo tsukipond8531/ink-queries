@@ -12,13 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use anyhow::{
-    Result,
-};
-
-use crate::substrate::PairSigner;
-use super::{SubstrateBaseConfig, ink::InkMeta, ContractInstance, pair_signer};
-
+use super::{ink::InkMeta, ContractInstance};
+use crate::substrate;
+use crate::substrate::{PairSigner, SubstrateBaseConfig};
+use anyhow::Result;
 
 pub struct NotInitialized;
 
@@ -42,13 +39,10 @@ impl Default for ContractBuilder<NotInitialized> {
     }
 }
 
-
 impl ContractBuilder<NotInitialized> {
     pub fn init_config(self, config: SubstrateBaseConfig) -> ContractBuilder<Initialized> {
         ContractBuilder {
-            state: Initialized {
-                config
-            }
+            state: Initialized { config },
         }
     }
 }
@@ -59,12 +53,11 @@ impl ContractBuilder<Initialized> {
 
         Ok(ContractBuilder {
             state: Signed {
-                signer: pair_signer(pair),
-            }
+                signer: substrate::pair_signer(pair),
+            },
         })
     }
 }
-
 
 impl ContractBuilder<Signed> {
     pub fn build(self) -> Result<ContractInstance> {

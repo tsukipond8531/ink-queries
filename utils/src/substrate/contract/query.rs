@@ -12,21 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use crate::substrate::contract::error::ErrorVariant;
-use crate::substrate::phala::Nonce;
-use crate::substrate::{Balance, Client, DefaultConfig, PairSigner};
-use anyhow::{Context, Result};
+use crate::substrate::phala::PhalaQuery;
+use crate::substrate::{Balance, Client, ContractId, DefaultConfig, Nonce, PairSigner};
+use anyhow::{anyhow, Context, Result};
 use contract_transcode::ContractMessageTranscoder;
 use contract_transcode::Value;
 use jsonrpsee::core::client::ClientT;
 use jsonrpsee::rpc_params;
 use jsonrpsee::ws_client::WsClientBuilder;
 use pallet_contracts_primitives::ContractExecResult;
-use phala_types::contract::ContractId;
 use scale::{Decode, Encode};
 use sp_core::Bytes;
 use sp_weights::Weight;
 use subxt::Config;
+
+use super::error::ErrorVariant;
 
 pub struct ContractQuery {
     msg_name: String,
@@ -35,7 +35,7 @@ pub struct ContractQuery {
 }
 
 impl ContractQuery {
-    pub fn call(&self, url: String, signer: &PairSigner) -> Result<CallResult, ErrorVariant> {
+    pub fn call(&self, url: String, signer: &PairSigner) -> Result<Value, ErrorVariant> {
         self.query
             .query(url, signer, &self.transcoder, self.msg_name.as_str())
     }
@@ -70,6 +70,7 @@ impl QueryBuilder {
     }
 }
 
+#[derive(Debug, Clone)]
 pub enum Query {
     InkQuery(Vec<u8>, <DefaultConfig as Config>::AccountId),
     PhalaQuery(Vec<u8>, ContractId, Nonce),
@@ -82,36 +83,97 @@ impl Query {
         signer: &PairSigner,
         transcoder: &ContractMessageTranscoder,
         msg_name: &str,
-    ) -> Result<CallResult, ErrorVariant> {
+    ) -> Result<Value, ErrorVariant> {
         match self {
-            Query::InkQuery(message, id) => async_std::task::block_on(async {
-                let client = Client::from_url(url.clone()).await?;
+            Query::InkQuery(message, id) => async_std::task::block_on(self.ink_query(
+                url,
+                signer,
+                transcoder,
+                msg_name,
+                id.clone(),
+                message.clone(),
+            )),
 
-                let result = self
-                    .call_dry_run(url, signer, id.clone(), message.clone())
-                    .await?;
+            Query::PhalaQuery(message, id, nonce) => {
+                let value = async_std::task::block_on(self.pink_query(
+                    url,
+                    signer,
+                    transcoder,
+                    msg_name,
+                    id.clone(),
+                    message.clone(),
+                    nonce.clone(),
+                ));
 
-                match result.result {
-                    Ok(ref ret_val) => {
-                        let value = transcoder
-                            .decode_return(msg_name, &mut &ret_val.data[..])
-                            .context(format!("Failed to decode return value {:?}", &ret_val))?;
-
-                        Ok(CallResult {
-                            is_success: true,
-                            reverted: ret_val.did_revert(),
-                            data: value,
-                        })
-                    }
-                    Err(ref err) => {
-                        let metadata = client.metadata();
-                        let error = ErrorVariant::from_dispatch_error(err, &metadata)?;
+                match value {
+                    Ok(res) => Ok(res),
+                    Err(err) => {
+                        let error = ErrorVariant::from(err);
                         Err(error)
                     }
                 }
-            }),
-            Query::PhalaQuery(_message, _id, _nonce) => {
-                Err(ErrorVariant::PhalaError("Not implemented".to_string()))
+            }
+        }
+    }
+
+    async fn pink_query(
+        &self,
+        url: String,
+        signer: &PairSigner,
+        transcoder: &ContractMessageTranscoder,
+        msg_name: &str,
+        id: ContractId,
+        message: Vec<u8>,
+        nonce: Nonce,
+    ) -> Result<Value> {
+        let payload = PhalaQuery::new(url.clone(), Query::PhalaQuery(message, id, nonce), signer)
+            .await?
+            .encrypt_and_sign()?
+            .query()
+            .await?
+            .result();
+
+        let ref output =
+            pallet_contracts_primitives::ContractExecResult::<u128>::decode(&mut &payload[..])?
+                .result
+                .map_err(|err| anyhow::anyhow!("DispatchError({err:?})"))?;
+
+        if output.did_revert() {
+            return Err(anyhow!("Contract execution reverted"));
+        }
+
+        let value = transcoder
+            .decode_return(msg_name, &mut &output.data[..])
+            .context(format!("Failed to decode return value {:?}", &output))?;
+
+        Ok(value)
+    }
+
+    async fn ink_query(
+        &self,
+        url: String,
+        signer: &PairSigner,
+        transcoder: &ContractMessageTranscoder,
+        msg_name: &str,
+        id: <DefaultConfig as Config>::AccountId,
+        message: Vec<u8>,
+    ) -> Result<Value, ErrorVariant> {
+        let client = Client::from_url(url.clone()).await?;
+
+        let result = self.call_dry_run(url, signer, id, message).await?;
+
+        match result.result {
+            Ok(ref ret_val) => {
+                let value = transcoder
+                    .decode_return(msg_name, &mut &ret_val.data[..])
+                    .context(format!("Failed to decode return value {:?}", &ret_val))?;
+
+                Ok(value)
+            }
+            Err(ref err) => {
+                let metadata = client.metadata();
+                let error = ErrorVariant::from_dispatch_error(err, &metadata)?;
+                Err(error)
             }
         }
     }
@@ -154,14 +216,4 @@ pub struct CallRequest {
     gas_limit: Option<Weight>,
     storage_deposit_limit: Option<Balance>,
     input_data: Vec<u8>,
-}
-
-/// Result of the contract call
-#[derive(serde::Serialize)]
-pub struct CallResult {
-    /// Result of a dry run
-    pub is_success: bool,
-    /// Was the operation reverted
-    pub reverted: bool,
-    pub data: Value,
 }

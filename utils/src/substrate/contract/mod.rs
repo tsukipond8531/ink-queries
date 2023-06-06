@@ -20,38 +20,12 @@ pub mod query;
 use self::{
     error::ErrorVariant,
     ink::InkMeta,
-    query::{CallResult, Query, QueryBuilder},
+    query::{Query, QueryBuilder},
 };
-use crate::substrate::PairSigner;
+
+use super::{Nonce, PairSigner};
 use anyhow::Result;
-use contract_transcode::ContractMessageTranscoder;
-use sp_core::{crypto::Pair, sr25519};
-
-use super::phala::Nonce;
-
-pub struct SubstrateBaseConfig {
-    /// Secret key URI of the node's substrate account.
-    suri: String,
-    /// Password for the secret key.
-    password: Option<String>,
-}
-
-impl SubstrateBaseConfig {
-    pub fn new(suri: String, password: Option<String>) -> Self {
-        Self { suri, password }
-    }
-
-    /// Returns the signer for contract extrinsics.
-    pub fn signer(&self) -> Result<sr25519::Pair> {
-        Pair::from_string(&self.suri, self.password.as_ref().map(String::as_ref))
-            .map_err(|_| anyhow::anyhow!("Secret string error"))
-    }
-}
-
-/// Create a new [`PairSigner`] from the given [`sr25519::Pair`].
-pub fn pair_signer(pair: sr25519::Pair) -> PairSigner {
-    PairSigner::new(pair)
-}
+use contract_transcode::{ContractMessageTranscoder, Value};
 
 pub struct ContractInstance {
     pub signer: PairSigner,
@@ -70,7 +44,7 @@ impl ContractInstance {
         msg_name: &str,
         args: Vec<String>,
         nonce: Option<Nonce>,
-    ) -> Result<CallResult, ErrorVariant> {
+    ) -> Result<Value, ErrorVariant> {
         let transcoder = self.get_transcoder()?;
 
         let call_data = transcoder.encode(msg_name, &args)?;

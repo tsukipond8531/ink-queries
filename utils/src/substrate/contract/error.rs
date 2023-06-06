@@ -21,7 +21,6 @@ pub enum ErrorVariant {
     Module(ModuleError),
     #[serde(rename = "generic_error")]
     Generic(GenericError),
-    PhalaError(String), //todo: add phala error
 }
 
 impl From<subxt::Error> for ErrorVariant {
@@ -112,7 +111,6 @@ impl Display for ErrorVariant {
                 err.pallet, err.error, err.docs
             )),
             ErrorVariant::Generic(err) => write!(f, "{}", err.error),
-            ErrorVariant::PhalaError(err) => write!(f, "{}", err),
         }
     }
 }
