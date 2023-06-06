@@ -1,0 +1,10 @@
+name: Build Rust Core
+description: Build core
+
+runs:
+  using: "composite"
+  steps:
+    - uses: ./.github/actions/install_toolchain
+    - name: Build core
+      run: cargo build --verbose
+      shell: bash
