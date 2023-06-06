@@ -14,4 +14,3 @@ runs:
       shell: bash
     - run: sudo apt -y install build-essential cmake pkg-config libssl-dev git llvm clang libclang-dev protobuf-compiler
       shell: bash
-
