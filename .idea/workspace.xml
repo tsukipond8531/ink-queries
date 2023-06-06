@@ -8,8 +8,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="722a382e-a571-41cc-843d-6b6a06e8b154" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.github/actions/build-core/action.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/actions/build-core/action.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.github/actions/install_toolchain/action.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/actions/install_toolchain/action.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.github/actions/build-core/action.yml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.github/actions/install_toolchain/action.yml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.github/workflows/build.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/build.yml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
@@ -41,7 +41,7 @@
     &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;dev-core&quot;,
     &quot;last_opened_file_path&quot;: &quot;/Users/emanuvalza/dev/drng-protocol/.github&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
@@ -150,7 +150,8 @@
       <workItem from="1685998801762" duration="4033000" />
       <workItem from="1686003141967" duration="141000" />
       <workItem from="1686003298488" duration="3922000" />
-      <workItem from="1686053523743" duration="1261000" />
+      <workItem from="1686053523743" duration="1876000" />
+      <workItem from="1686056241935" duration="35000" />
     </task>
     <servers />
   </component>
