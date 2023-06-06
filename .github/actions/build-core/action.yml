@@ -7,4 +7,4 @@ runs:
     - uses: ./.github/actions/install_toolchain
     - name: Build core
       run: cargo build --verbose
-      shell: bash
+        shell: bash
