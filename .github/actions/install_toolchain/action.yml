@@ -11,9 +11,9 @@ runs:
         target: wasm32-unknown-unknown
         components: rustfmt
     - run: sudo apt update
-    shell: bash
+      shell: bash
     - run: sudo apt -y install build-essential cmake pkg-config libssl-dev git llvm clang libclang-dev protobuf-compiler
-    shell: bash
+      shell: bash
     - run: git submodule update --init phala-blockchain
-    shell: bash
+      shell: bash
     
