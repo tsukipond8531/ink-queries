@@ -9,6 +9,11 @@ fn main() {
     )
     .unwrap();
 
-    let value = contract.instance.call_msg("get", vec![], None).unwrap();
+    // Prepare for dummy phala call
+    let nonce = [1; 32];
+    let value = contract
+        .instance
+        .call_msg("get", vec![], Some(nonce))
+        .unwrap();
     println!("{}", value);
 }

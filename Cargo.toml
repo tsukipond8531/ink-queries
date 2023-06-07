@@ -3,7 +3,7 @@ members = [
     "oracle",
     "contracts",
     "utils",
-    "debug-cli",
+    "debug",
 ]
 
 exclude = [
