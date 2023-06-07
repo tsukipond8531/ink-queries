@@ -1,192 +1,168 @@
-use super::contract::ink;
-use super::{contract::query::Query, PairSigner};
-use crate::substrate::{KeyExtension, Nonce, PairExtension};
+use crate::substrate::{contract::ink::try_decode_hex, ContractId, KeyExtension, Nonce};
 use anyhow::anyhow;
 use anyhow::Result;
 use phactory_api::prpc::phactory_api_client::PhactoryApiClient;
-
 use phactory_api::pruntime_client::RpcRequest;
 use phactory_api::{
     crypto::{CertificateBody, EncryptedData},
     prpc,
 };
 use phala_crypto::aead;
-use phala_crypto::ecdh::{EcdhKey, EcdhPublicKey};
+use phala_crypto::ecdh::EcdhPublicKey;
 use phala_types::contract;
 use scale::{Decode, Encode};
 use sp_core::Pair;
 use std::convert::TryFrom as _;
 
-#[derive(Debug, Encode, Decode)]
-struct InkMessage(Vec<u8>);
+const DEPOSIT: u128 = 0;
+const TRANSFER: u128 = 0;
+
+struct Worker {
+    pubkey: EcdhPublicKey,
+}
+
+struct PRuntime {
+    pr: PhactoryApiClient<RpcRequest>,
+}
+
+impl PRuntime {
+    fn new(url: &str) -> Self {
+        Self {
+            pr: phactory_api::pruntime_client::new_pruntime_client(url.to_string()),
+        }
+    }
+
+    async fn retrieve_worker(&self) -> Result<Worker> {
+        let info = self.pr.get_info(()).await?;
+        let pubkey = info
+            .system
+            .ok_or_else(|| anyhow!("Worker not initialized"))?
+            .ecdh_public_key;
+        let pubkey = try_decode_hex(&pubkey)?;
+        let pubkey = EcdhPublicKey::try_from(&pubkey[..])?;
+
+        Ok(Worker { pubkey })
+    }
+}
+
+// Copied from phat-poller crate for phat contract queries
+
+pub async fn pink_query_raw(
+    url: &str,
+    id: ContractId,
+    call_data: Vec<u8>,
+    key: &sp_core::sr25519::Pair,
+    nonce: Nonce,
+) -> Result<Result<Vec<u8>, QueryError>> {
+    let query = PinkQuery::InkMessage {
+        payload: call_data,
+        deposit: DEPOSIT,
+        transfer: TRANSFER,
+        estimating: false,
+    };
+    let result: Result<Response, QueryError> = contract_query(url, id, query, key, nonce).await?;
+    Ok(result.map(|r| {
+        let Response::Payload(payload) = r;
+        payload
+    }))
+}
+
+pub async fn contract_query<Request: Encode, Response: Decode>(
+    url: &str,
+    id: ContractId,
+    data: Request,
+    key: &sp_core::sr25519::Pair,
+    nonce: Nonce,
+) -> Result<Response> {
+    // 2. Make ContractQuery
+    let head = contract::ContractQueryHead { id, nonce };
+    let query = contract::ContractQuery { head, data };
+
+    let p_runtime = PRuntime::new(url);
+
+    let worker = p_runtime.retrieve_worker().await?;
+
+    // 3. Encrypt the ContractQuery.
+
+    let ecdh_key = sp_core::sr25519::Pair::generate()
+        .0
+        .derive_ecdh_key()
+        .map_err(|_| anyhow!("Derive ecdh key failed"))?;
+
+    let iv = aead::generate_iv(&nonce);
+    let encrypted_data = EncryptedData::encrypt(&ecdh_key, &worker.pubkey, iv, &query.encode())
+        .map_err(|_| anyhow!("Encrypt data failed"))?;
+
+    let data_cert_body = CertificateBody {
+        pubkey: key.public().to_vec(),
+        ttl: u32::MAX,
+        config_bits: 0,
+    };
+    let data_cert = prpc::Certificate::new(data_cert_body, None);
+    let data_signature = prpc::Signature {
+        signed_by: Some(Box::new(data_cert)),
+        signature_type: prpc::SignatureType::Sr25519 as _,
+        signature: key.sign(&encrypted_data.encode()).0.to_vec(),
+    };
+
+    let request = prpc::ContractQueryRequest::new(encrypted_data, Some(data_signature));
+
+    // 5. Do the RPC call.
+    let response = p_runtime.pr.contract_query(request).await?;
+
+    // 6. Decrypt the response.
+    let encrypted_data = response.decode_encrypted_data()?;
+    let data = encrypted_data
+        .decrypt(&ecdh_key)
+        .map_err(|_| anyhow!("Decrypt data failed"))?;
+
+    // 7. Decode the response.
+    let response: contract::ContractQueryResponse<Response> = Decode::decode(&mut &data[..])?;
+
+    // 8. check the nonce is match the one we sent.
+    if response.nonce != nonce {
+        return Err(anyhow!("nonce mismatch"));
+    }
+
+    Ok(response.result)
+}
 
 #[derive(Debug, Encode, Decode)]
 pub enum Response {
     Payload(Vec<u8>),
 }
 
-pub struct Ready;
+// Copied from phat-poller query module in phala-blockchain/standalone
 
-pub struct InProcess {
-    pr: PhactoryApiClient<RpcRequest>,
-    req: contract::ContractQuery<InkMessage>,
+#[derive(Debug, Encode, Decode)]
+pub enum PinkQuery {
+    InkMessage {
+        payload: Vec<u8>,
+        /// Amount of tokens deposit to the caller.
+        deposit: u128,
+        /// Amount of tokens transfer from the caller to the target contract.
+        transfer: u128,
+        /// Whether to use the gas estimation mode.
+        estimating: bool,
+    },
+    SidevmQuery(Vec<u8>),
 }
 
-pub struct Encrypted {
-    pr: PhactoryApiClient<RpcRequest>,
-    ecdh_key: EcdhKey,
-    req: prpc::ContractQueryRequest,
+#[derive(Debug, Encode, Decode)]
+pub enum QueryError {
+    BadOrigin,
+    RuntimeError(String),
+    SidevmNotFound,
 }
 
-pub struct Computed<Result: Decode> {
-    result: Result,
-}
-
-pub struct PhalaQuery<T> {
-    nonce: Option<Nonce>,
-    /// Public key used for the key agreement
-    remote_pubkey: Option<EcdhPublicKey>,
-    /// Signer of the request
-    signer: Option<PairSigner>,
-    /// state of the request to be encrypted
-    state: T,
-}
-
-impl Default for PhalaQuery<Ready> {
-    fn default() -> Self {
-        Self {
-            nonce: None,
-            remote_pubkey: None,
-            signer: None,
-            state: Ready,
+impl std::fmt::Display for QueryError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            QueryError::BadOrigin => write!(f, "Bad origin"),
+            QueryError::RuntimeError(msg) => write!(f, "Runtime error: {}", msg),
+            QueryError::SidevmNotFound => write!(f, "Sidevm not found"),
         }
     }
 }
 
-/// 1. Make the Contract Query
-impl PhalaQuery<Ready> {
-    pub async fn new(
-        url: String,
-        query: Query,
-        signer: &PairSigner,
-    ) -> Result<PhalaQuery<InProcess>> {
-        match query {
-            Query::PhalaQuery(message, id, nonce) => {
-                let nonce_query = nonce.clone();
-                let head = contract::ContractQueryHead { id, nonce };
-                let query = contract::ContractQuery {
-                    head,
-                    data: InkMessage(message),
-                };
-                let pr = phactory_api::pruntime_client::new_pruntime_client(url);
-
-                let info = pr.get_info(()).await?;
-                let remote_pubkey = info
-                    .system
-                    .ok_or_else(|| anyhow!("Worker not initialized"))?
-                    .ecdh_public_key;
-
-                let remote_pubkey = ink::try_decode_hex(&remote_pubkey)?;
-                let remote_pubkey = EcdhPublicKey::try_from(&remote_pubkey[..])?;
-
-                Ok(PhalaQuery {
-                    nonce: Some(nonce_query),
-                    remote_pubkey: Some(remote_pubkey),
-                    signer: Some(signer.consume_ref()),
-                    state: InProcess { pr, req: query },
-                })
-            }
-
-            Query::InkQuery(_msg, _id) => anyhow::bail!("Only Phala queries are allowed"),
-        }
-    }
-}
-
-/// 2. Encrypt the Contract Query
-impl PhalaQuery<InProcess> {
-    /// Encrypt the Contract Query
-    pub fn encrypt_and_sign(self) -> Result<PhalaQuery<Encrypted>> {
-        let ecdh_key = sp_core::sr25519::Pair::generate()
-            .0
-            .derive_ecdh_key()
-            .map_err(|_| anyhow!("Derive ecdh key failed"))?;
-
-        let iv = aead::generate_iv(&self.nonce.unwrap());
-
-        let encrypted_data = EncryptedData::encrypt(
-            &ecdh_key,
-            &self.remote_pubkey.unwrap(),
-            iv,
-            &self.state.req.encode(),
-        )
-        .map_err(|_| anyhow!("Encrypt data failed"))?;
-
-        let signer = self.signer.as_ref().unwrap().signer();
-
-        let data_cert_body = CertificateBody {
-            pubkey: signer.public().to_vec(),
-            ttl: u32::MAX,
-            config_bits: 0,
-        };
-        let data_cert = prpc::Certificate::new(data_cert_body, None);
-        let data_signature = prpc::Signature {
-            signed_by: Some(Box::new(data_cert)),
-            signature_type: prpc::SignatureType::Sr25519 as _,
-            signature: signer.sign(&encrypted_data.encode()).0.to_vec(),
-        };
-
-        let req = prpc::ContractQueryRequest::new(encrypted_data, Some(data_signature));
-
-        Ok(PhalaQuery {
-            nonce: self.nonce,
-            remote_pubkey: self.remote_pubkey,
-            signer: self.signer,
-            state: Encrypted {
-                pr: self.state.pr,
-                ecdh_key,
-                req,
-            },
-        })
-    }
-}
-
-/// 3. Make the rpc call and retrieve result
-impl PhalaQuery<Encrypted> {
-    pub async fn query<Response: Decode>(self) -> Result<PhalaQuery<Computed<Response>>> {
-        let ecdh_key = self.state.ecdh_key;
-
-        let request = self.state.req;
-
-        let response = self.state.pr.contract_query(request).await?;
-
-        // Decrypt the response
-        let encrypted_data = response.decode_encrypted_data()?;
-        let data = encrypted_data
-            .decrypt(&ecdh_key)
-            .map_err(|_| anyhow!("Decrypt data failed"))?;
-
-        // Decode the response.
-        let response: contract::ContractQueryResponse<Response> = Decode::decode(&mut &data[..])?;
-
-        // check the nonce is match the one we sent.
-        if response.nonce != self.nonce.unwrap() {
-            return Err(anyhow!("nonce mismatch"));
-        }
-
-        Ok(PhalaQuery {
-            nonce: None,
-            remote_pubkey: None,
-            signer: None,
-            state: Computed {
-                result: response.result,
-            },
-        })
-    }
-}
-
-impl PhalaQuery<Computed<Response>> {
-    pub fn result(self) -> Vec<u8> {
-        let Response::Payload(payload) = self.state.result;
-        payload
-    }
-}
+impl std::error::Error for QueryError {}

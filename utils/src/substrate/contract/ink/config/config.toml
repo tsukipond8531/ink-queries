@@ -1,5 +1,5 @@
 #Test config file
 
 contract_path = "utils/src/substrate/contract/ink/config/testcontract.contract"
-url = "ws://127.0.0.1:9944"
-ink_contract_id = "5HAKXQzgjUZEFgtXb7GWLQQNwUSt5ji38CchMLmNd9U59xT1"
+url = "https://poc5.phala.network/tee-api-1"
+phala_contract_id = "0x23e97bf2fc43a00b93397f8b5f59170ead49c5dc24a0a995aab8810d3f14d881"

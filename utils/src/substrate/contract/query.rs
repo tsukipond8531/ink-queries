@@ -12,8 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use crate::substrate::phala::PhalaQuery;
-use crate::substrate::{Balance, Client, ContractId, DefaultConfig, Nonce, PairSigner};
+use crate::substrate::{phala, Balance, Client, ContractId, DefaultConfig, Nonce, PairSigner};
 use anyhow::{anyhow, Context, Result};
 use contract_transcode::ContractMessageTranscoder;
 use contract_transcode::Value;
@@ -126,12 +125,7 @@ impl Query {
         message: Vec<u8>,
         nonce: Nonce,
     ) -> Result<Value> {
-        let payload = PhalaQuery::new(url.clone(), Query::PhalaQuery(message, id, nonce), signer)
-            .await?
-            .encrypt_and_sign()?
-            .query()
-            .await?
-            .result();
+        let payload = phala::pink_query_raw(&url, id, message, signer.signer(), nonce).await??;
 
         let ref output =
             pallet_contracts_primitives::ContractExecResult::<u128>::decode(&mut &payload[..])?

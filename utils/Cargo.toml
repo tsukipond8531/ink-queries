@@ -32,4 +32,3 @@ contract-transcode = { git = "https://github.com/paritytech/cargo-contract", ver
 phala-types = { path = "../phala-blockchain/crates/phala-types" }
 phala-crypto = { path = "../phala-blockchain/crates/phala-crypto" }
 phactory-api = { path = "../phala-blockchain/crates/phactory/api", features = ["pruntime-client"] }
-
