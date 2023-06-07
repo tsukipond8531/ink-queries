@@ -8,12 +8,17 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="722a382e-a571-41cc-843d-6b6a06e8b154" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/phala-blockchain" beforeDir="false" afterPath="$PROJECT_DIR$/phala-blockchain" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/phala-blockchain/crates/phactory/src/prpc_service.rs" beforeDir="false" afterPath="$PROJECT_DIR$/phala-blockchain/crates/phactory/src/prpc_service.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/phala-blockchain/Cargo.toml" beforeDir="false" afterPath="$PROJECT_DIR$/phala-blockchain/Cargo.toml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/phala-blockchain/crates/phactory/src/light_validation/mod.rs" beforeDir="false" afterPath="$PROJECT_DIR$/phala-blockchain/crates/phactory/src/light_validation/mod.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/phala-blockchain/crates/pink/pink-extension/src/logger.rs" beforeDir="false" afterPath="$PROJECT_DIR$/phala-blockchain/crates/pink/pink-extension/src/logger.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/phala-blockchain/scripts/coverage-pallets.sh" beforeDir="false" afterPath="$PROJECT_DIR$/phala-blockchain/scripts/coverage-pallets.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/phala-blockchain/standalone/prouter/src/config.rs" beforeDir="false" afterPath="$PROJECT_DIR$/phala-blockchain/standalone/prouter/src/config.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/phala-blockchain/vendor/ring/Cargo.toml" beforeDir="false" afterPath="$PROJECT_DIR$/phala-blockchain/vendor/ring/Cargo.toml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/phala-blockchain/vendor/ring/build.rs" beforeDir="false" afterPath="$PROJECT_DIR$/phala-blockchain/vendor/ring/build.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/src/substrate/contract/query.rs" beforeDir="false" afterPath="$PROJECT_DIR$/utils/src/substrate/contract/query.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/src/substrate/phala.rs" beforeDir="false" afterPath="$PROJECT_DIR$/utils/src/substrate/phala.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/phala-blockchain/vendor/ring/mk/cargo.sh" beforeDir="false" afterPath="$PROJECT_DIR$/phala-blockchain/vendor/ring/mk/cargo.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/phala-blockchain/vendor/ring/tests/digest_tests.rs" beforeDir="false" afterPath="$PROJECT_DIR$/phala-blockchain/vendor/ring/tests/digest_tests.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/phala-blockchain/vendor/webpki/mk/cargo.sh" beforeDir="false" afterPath="$PROJECT_DIR$/phala-blockchain/vendor/webpki/mk/cargo.sh" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -43,7 +48,7 @@
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "WebServerToolWindowFactoryState": "false",
-    "git-widget-placeholder": "debug-workers",
+    "git-widget-placeholder": "dev-core",
     "last_opened_file_path": "/Users/emanuvalza/dev/drng-protocol/.github",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
@@ -67,7 +72,7 @@
       <command value="cargo build" />
     </option>
   </component>
-  <component name="RunManager" selected="Cargo.Run debug">
+  <component name="RunManager" selected="Cargo.Run debug-cli">
     <configuration name="Run debug-cli" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
       <option name="command" value="run --package debug-cli --bin debug-cli" />
       <option name="workingDirectory" value="file://$PROJECT_DIR$" />
@@ -138,8 +143,8 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Cargo.Run debug" />
         <item itemvalue="Cargo.Run debug-cli" />
+        <item itemvalue="Cargo.Run debug" />
         <item itemvalue="Cargo.build" />
         <item itemvalue="Cargo.build" />
         <item itemvalue="Cargo.build" />
