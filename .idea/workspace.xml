@@ -8,16 +8,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="722a382e-a571-41cc-843d-6b6a06e8b154" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/drng-protocol.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/drng-protocol.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Cargo.toml" beforeDir="false" afterPath="$PROJECT_DIR$/Cargo.toml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/debug-cli/Cargo.toml" beforeDir="false" afterPath="$PROJECT_DIR$/debug/Cargo.toml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/debug-cli/src/main.rs" beforeDir="false" afterPath="$PROJECT_DIR$/debug/src/main.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/phala-blockchain" beforeDir="false" afterPath="$PROJECT_DIR$/phala-blockchain" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/phala-blockchain/crates/phactory/src/prpc_service.rs" beforeDir="false" afterPath="$PROJECT_DIR$/phala-blockchain/crates/phactory/src/prpc_service.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/phala-blockchain/vendor/ring/build.rs" beforeDir="false" afterPath="$PROJECT_DIR$/phala-blockchain/vendor/ring/build.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/Cargo.toml" beforeDir="false" afterPath="$PROJECT_DIR$/utils/Cargo.toml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/src/substrate/contract/ink/config/config.toml" beforeDir="false" afterPath="$PROJECT_DIR$/utils/src/substrate/contract/ink/config/config.toml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/utils/src/substrate/contract/query.rs" beforeDir="false" afterPath="$PROJECT_DIR$/utils/src/substrate/contract/query.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/utils/src/substrate/phala.rs" beforeDir="false" afterPath="$PROJECT_DIR$/utils/src/substrate/phala.rs" afterDir="false" />
     </list>
@@ -178,7 +172,7 @@
       <workItem from="1686053523743" duration="1876000" />
       <workItem from="1686056241935" duration="35000" />
       <workItem from="1686056475324" duration="27000" />
-      <workItem from="1686083588745" duration="20938000" />
+      <workItem from="1686083588745" duration="30697000" />
     </task>
     <servers />
   </component>

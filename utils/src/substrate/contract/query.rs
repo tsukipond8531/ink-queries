@@ -13,8 +13,8 @@
 // limitations under the License.
 
 use crate::substrate::contract::ink::{decode_hex, try_decode_hex};
-use crate::substrate::phala::{pink_query_raw, query_test, PhalaQuery, PinkQuery, Response};
-use crate::substrate::{Balance, Client, ContractId, DefaultConfig, Nonce, PairSigner};
+use crate::substrate::phala::Response;
+use crate::substrate::{phala, Balance, Client, ContractId, DefaultConfig, Nonce, PairSigner};
 use anyhow::{anyhow, Context, Result};
 use contract_transcode::ContractMessageTranscoder;
 use contract_transcode::Value;
@@ -129,38 +129,7 @@ impl Query {
         message: Vec<u8>,
         nonce: Nonce,
     ) -> Result<Value> {
-        #[derive(Debug, Encode, Decode)]
-        pub enum Query {
-            InkMessage {
-                payload: Vec<u8>,
-                /// Amount of tokens deposit to the caller.
-                deposit: u128,
-                /// Amount of tokens transfer from the caller to the target contract.
-                transfer: u128,
-                /// Whether to use the gas estimation mode.
-                estimating: bool,
-            },
-            SidevmQuery(Vec<u8>),
-        }
-
-        let data = Query::InkMessage {
-            payload: message.clone(),
-            deposit: 0,
-            transfer: 0,
-            estimating: false,
-        };
-
-        let pr = phactory_api::pruntime_client::new_pruntime_client(url.clone());
-
-        let info = pr.get_info(()).await?;
-        let remote_pubkey = info
-            .system
-            .ok_or_else(|| anyhow!("Worker not initialized"))?
-            .ecdh_public_key;
-        let remote_pubkey = try_decode_hex(&remote_pubkey)?;
-        let remote_pubkey = EcdhPublicKey::try_from(&remote_pubkey[..])?;
-
-        let payload = pink_query_raw(&remote_pubkey, &url, id, message, signer.signer()).await??;
+        let payload = phala::pink_query_raw(&url, id, message, signer.signer(), nonce).await??;
 
         let ref output =
             pallet_contracts_primitives::ContractExecResult::<u128>::decode(&mut &payload[..])?
