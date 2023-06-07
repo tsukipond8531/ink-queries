@@ -1,22 +1,21 @@
-use super::contract::ink;
-use super::{contract::query::Query, PairSigner};
-use crate::substrate::{ContractId, KeyExtension, Nonce, PairExtension};
+use crate::substrate::{contract::ink::try_decode_hex, ContractId, KeyExtension, Nonce};
 use anyhow::anyhow;
 use anyhow::Result;
 use phactory_api::prpc::phactory_api_client::PhactoryApiClient;
-
-use crate::substrate::contract::ink::{decode_hex, try_decode_hex};
 use phactory_api::pruntime_client::RpcRequest;
 use phactory_api::{
     crypto::{CertificateBody, EncryptedData},
     prpc,
 };
 use phala_crypto::aead;
-use phala_crypto::ecdh::{EcdhKey, EcdhPublicKey};
+use phala_crypto::ecdh::EcdhPublicKey;
 use phala_types::contract;
 use scale::{Decode, Encode};
 use sp_core::Pair;
 use std::convert::TryFrom as _;
+
+const DEPOSIT: u128 = 0;
+const TRANSFER: u128 = 0;
 
 struct Worker {
     pubkey: EcdhPublicKey,
@@ -47,6 +46,7 @@ impl PRuntime {
 }
 
 // Copied from phat-poller crate for phat contract queries
+
 pub async fn pink_query_raw(
     url: &str,
     id: ContractId,
@@ -56,8 +56,8 @@ pub async fn pink_query_raw(
 ) -> Result<Result<Vec<u8>, QueryError>> {
     let query = PinkQuery::InkMessage {
         payload: call_data,
-        deposit: 0,
-        transfer: 0,
+        deposit: DEPOSIT,
+        transfer: TRANSFER,
         estimating: false,
     };
     let result: Result<Response, QueryError> = contract_query(url, id, query, key, nonce).await?;
@@ -123,6 +123,7 @@ pub async fn contract_query<Request: Encode, Response: Decode>(
     if response.nonce != nonce {
         return Err(anyhow!("nonce mismatch"));
     }
+
     Ok(response.result)
 }
 
@@ -153,6 +154,7 @@ pub enum QueryError {
     RuntimeError(String),
     SidevmNotFound,
 }
+
 impl std::fmt::Display for QueryError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
@@ -162,4 +164,5 @@ impl std::fmt::Display for QueryError {
         }
     }
 }
+
 impl std::error::Error for QueryError {}

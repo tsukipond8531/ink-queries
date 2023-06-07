@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use crate::substrate::contract::ink::{decode_hex, try_decode_hex};
-use crate::substrate::phala::Response;
 use crate::substrate::{phala, Balance, Client, ContractId, DefaultConfig, Nonce, PairSigner};
 use anyhow::{anyhow, Context, Result};
 use contract_transcode::ContractMessageTranscoder;
@@ -22,11 +20,9 @@ use jsonrpsee::core::client::ClientT;
 use jsonrpsee::rpc_params;
 use jsonrpsee::ws_client::WsClientBuilder;
 use pallet_contracts_primitives::ContractExecResult;
-use phala_crypto::ecdh::EcdhPublicKey;
 use scale::{Decode, Encode};
 use sp_core::Bytes;
 use sp_weights::Weight;
-use std::convert::TryFrom as _;
 use subxt::Config;
 
 use super::error::ErrorVariant;

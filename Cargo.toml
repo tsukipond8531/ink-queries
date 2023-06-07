@@ -3,7 +3,7 @@ members = [
     "oracle",
     "contracts",
     "utils",
-    "debug",
+    "debug-cli",
 ]
 
 exclude = [
@@ -26,6 +26,6 @@ codegen-units = 1
 
 [profile.testnet]
 inherits = "release"
-debug = 1 # debug symbols are useful for profilers
+debug = 1 # debug-cli symbols are useful for profilers
 debug-assertions = true
 overflow-checks = true
