@@ -1,6 +1,6 @@
-<mxfile host="app.diagrams.net" modified="2023-06-09T02:48:31.214Z" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36" etag="oX1JpFKhwlFihTTqkf-r" version="21.3.8" type="github">
+<mxfile host="app.diagrams.net" modified="2023-06-09T02:49:49.103Z" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36" etag="GNbgC_AAbvtI4mGpDXaE" version="21.3.8" type="github">
   <diagram id="C5RBs43oDa-KdzZeNtuy" name="Page-1">
-    <mxGraphModel dx="5229" dy="2055" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="120000" pageHeight="160000" math="0" shadow="0">
+    <mxGraphModel dx="2301" dy="904" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="120000" pageHeight="160000" math="0" shadow="0">
       <root>
         <mxCell id="WIyWlLk6GJQsqaUBKTNV-0" />
         <mxCell id="WIyWlLk6GJQsqaUBKTNV-1" parent="WIyWlLk6GJQsqaUBKTNV-0" />
@@ -49,7 +49,7 @@
         <mxCell id="3_1_JiswwGQ6XDFufu0A-34" value="&lt;font style=&quot;font-size: 16px;&quot; face=&quot;Georgia&quot;&gt;- setThreshold(threshold)&lt;/font&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" parent="WIyWlLk6GJQsqaUBKTNV-1" vertex="1">
           <mxGeometry x="1530" y="835" width="370" height="30" as="geometry" />
         </mxCell>
-        <mxCell id="3_1_JiswwGQ6XDFufu0A-35" value="&lt;font style=&quot;font-size: 16px;&quot; face=&quot;Georgia&quot;&gt;- computeCommit(nonce): Commit&lt;/font&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" parent="WIyWlLk6GJQsqaUBKTNV-1" vertex="1">
+        <mxCell id="3_1_JiswwGQ6XDFufu0A-35" value="&lt;font style=&quot;font-size: 16px;&quot; face=&quot;Georgia&quot;&gt;- computeCommit(nonce): String&lt;/font&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" parent="WIyWlLk6GJQsqaUBKTNV-1" vertex="1">
           <mxGeometry x="1530" y="875" width="290" height="30" as="geometry" />
         </mxCell>
         <mxCell id="3_1_JiswwGQ6XDFufu0A-36" value="&lt;font style=&quot;font-size: 16px;&quot; face=&quot;Georgia&quot;&gt;+ getAuthRoles(): AccountId[]&lt;/font&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" parent="WIyWlLk6GJQsqaUBKTNV-1" vertex="1">
@@ -150,7 +150,7 @@
         <mxCell id="3_1_JiswwGQ6XDFufu0A-74" value="&lt;font style=&quot;font-size: 16px;&quot; face=&quot;Georgia&quot;&gt;- authenticatePeer(): bool&lt;/font&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" parent="WIyWlLk6GJQsqaUBKTNV-1" vertex="1">
           <mxGeometry x="2175" y="555" width="215" height="30" as="geometry" />
         </mxCell>
-        <mxCell id="3_1_JiswwGQ6XDFufu0A-75" value="&lt;font style=&quot;font-size: 16px;&quot; face=&quot;Georgia&quot;&gt;- retrieveCommit(nonce): Commit&lt;/font&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" parent="WIyWlLk6GJQsqaUBKTNV-1" vertex="1">
+        <mxCell id="3_1_JiswwGQ6XDFufu0A-75" value="&lt;font style=&quot;font-size: 16px;&quot; face=&quot;Georgia&quot;&gt;- retrieveCommit(nonce): String&lt;/font&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" parent="WIyWlLk6GJQsqaUBKTNV-1" vertex="1">
           <mxGeometry x="2175" y="595" width="255" height="30" as="geometry" />
         </mxCell>
         <mxCell id="3_1_JiswwGQ6XDFufu0A-77" value="&lt;font style=&quot;font-size: 16px;&quot; face=&quot;Georgia&quot;&gt;- vdfTrapdoor(x): VDFOutProof&lt;/font&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" parent="WIyWlLk6GJQsqaUBKTNV-1" vertex="1">
