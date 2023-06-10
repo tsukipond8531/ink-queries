@@ -1,6 +1,6 @@
-<mxfile host="app.diagrams.net" modified="2023-06-10T03:07:28.720Z" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36" etag="b5UsR71At0sCc8XNq81o" version="21.3.8" type="github">
+<mxfile host="app.diagrams.net" modified="2023-06-10T03:10:51.703Z" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36" etag="qNurpfjGRp0UWGvwuKyl" version="21.3.8" type="github">
   <diagram id="C5RBs43oDa-KdzZeNtuy" name="Page-1">
-    <mxGraphModel dx="1192" dy="779" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="120000" pageHeight="160000" math="0" shadow="0">
+    <mxGraphModel dx="1332" dy="871" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="120000" pageHeight="160000" math="0" shadow="0">
       <root>
         <mxCell id="WIyWlLk6GJQsqaUBKTNV-0" />
         <mxCell id="WIyWlLk6GJQsqaUBKTNV-1" parent="WIyWlLk6GJQsqaUBKTNV-0" />
@@ -139,17 +139,17 @@
         <mxCell id="3_1_JiswwGQ6XDFufu0A-74" value="&lt;font style=&quot;font-size: 16px;&quot; face=&quot;Georgia&quot;&gt;+ authenticatePeer(): bool&lt;/font&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" parent="WIyWlLk6GJQsqaUBKTNV-1" vertex="1">
           <mxGeometry x="885" y="756.3199999999999" width="215" height="30" as="geometry" />
         </mxCell>
-        <mxCell id="3_1_JiswwGQ6XDFufu0A-75" value="&lt;font style=&quot;font-size: 16px;&quot; face=&quot;Georgia&quot;&gt;- retrieveCommit(nonce): String&lt;/font&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" parent="WIyWlLk6GJQsqaUBKTNV-1" vertex="1">
-          <mxGeometry x="885" y="796.3199999999999" width="255" height="30" as="geometry" />
+        <mxCell id="3_1_JiswwGQ6XDFufu0A-75" value="&lt;font style=&quot;font-size: 16px;&quot; face=&quot;Georgia&quot;&gt;- retrieveCommit(nonce: CommitRequest): String&lt;/font&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" parent="WIyWlLk6GJQsqaUBKTNV-1" vertex="1">
+          <mxGeometry x="885" y="796.32" width="385" height="30" as="geometry" />
         </mxCell>
-        <mxCell id="3_1_JiswwGQ6XDFufu0A-77" value="&lt;font style=&quot;font-size: 16px;&quot; face=&quot;Georgia&quot;&gt;- vdfTrapdoor(x): VDFOutSign&lt;/font&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" parent="WIyWlLk6GJQsqaUBKTNV-1" vertex="1">
-          <mxGeometry x="885" y="836.3199999999999" width="240" height="30" as="geometry" />
+        <mxCell id="3_1_JiswwGQ6XDFufu0A-77" value="&lt;font style=&quot;font-size: 16px;&quot; face=&quot;Georgia&quot;&gt;- vdfTrapdoor(req: TrapRequest): VDFOutSign&lt;/font&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" parent="WIyWlLk6GJQsqaUBKTNV-1" vertex="1">
+          <mxGeometry x="885" y="836.32" width="345" height="30" as="geometry" />
         </mxCell>
-        <mxCell id="3_1_JiswwGQ6XDFufu0A-78" value="&lt;font style=&quot;font-size: 16px;&quot; face=&quot;Georgia&quot;&gt;+ vdfEval(x): VDFOutSign&lt;/font&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" parent="WIyWlLk6GJQsqaUBKTNV-1" vertex="1">
-          <mxGeometry x="885" y="876.3199999999999" width="240" height="30" as="geometry" />
+        <mxCell id="3_1_JiswwGQ6XDFufu0A-78" value="&lt;font style=&quot;font-size: 16px;&quot; face=&quot;Georgia&quot;&gt;+ vdfEval(x: String): VDFOutSign&lt;/font&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" parent="WIyWlLk6GJQsqaUBKTNV-1" vertex="1">
+          <mxGeometry x="885" y="876.32" width="265" height="30" as="geometry" />
         </mxCell>
-        <mxCell id="3_1_JiswwGQ6XDFufu0A-79" value="&lt;font style=&quot;font-size: 16px;&quot; face=&quot;Georgia&quot;&gt;+ vdfVerify(x, y, proof): VDFOutSign&lt;/font&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" parent="WIyWlLk6GJQsqaUBKTNV-1" vertex="1">
-          <mxGeometry x="885" y="916.3199999999999" width="285" height="30" as="geometry" />
+        <mxCell id="3_1_JiswwGQ6XDFufu0A-79" value="&lt;font style=&quot;font-size: 16px;&quot; face=&quot;Georgia&quot;&gt;+ vdfVerify(x: String, y: Integer, proof: Integer): VDFOutSign&lt;/font&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" parent="WIyWlLk6GJQsqaUBKTNV-1" vertex="1">
+          <mxGeometry x="885" y="916.32" width="445" height="30" as="geometry" />
         </mxCell>
         <mxCell id="3_1_JiswwGQ6XDFufu0A-80" value="" style="endArrow=open;endFill=1;endSize=12;html=1;rounded=0;exitX=0.77;exitY=1.001;exitDx=0;exitDy=0;entryX=0.452;entryY=-0.015;entryDx=0;entryDy=0;exitPerimeter=0;entryPerimeter=0;" parent="WIyWlLk6GJQsqaUBKTNV-1" source="3_1_JiswwGQ6XDFufu0A-0" target="HBPohB_J1IHhmAhJm7vf-85" edge="1">
           <mxGeometry width="160" relative="1" as="geometry">
