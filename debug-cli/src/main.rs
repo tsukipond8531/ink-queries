@@ -4,7 +4,7 @@ use std::vec;
 
 fn main() {
     let contract = utils::substrate::SubstrateContract::from_account(
-        "fix enable minimum debate purse act congress poet give alley inch town".to_string(),
+        "fix enable minimum debate purse act congress poet give alley inch town".to_string(), // sample seed, NEVER expose it in clear
         None,
     )
     .unwrap();
